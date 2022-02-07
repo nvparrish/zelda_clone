@@ -6,4 +6,4 @@ class Level:
         print("Creating a new level.")
     def draw(self):
         """ Draw the current level """
-        print("Nothing to draw")
+        print("Nothing to draw ... yet")
