@@ -58,10 +58,12 @@ class Player:
 
         self._timer = 0
         self._frame = 0
-        self._player_direction = Direction.DOWN
-        self._player_action = Action.WALK
+        self._player_direction = Direction.LEFT
+        self._player_action = Action.CARRY
 
         self._position = (settings.WIDTH//2, settings.HEIGHT//2) # Currently in reference to the screen, using the upper-left corner
+        self._scale = 2.0
+        self._rotation = 0.0
 
     def set_direction(self, direction):
         self._player_direction = direction
@@ -83,10 +85,30 @@ class Player:
         o = animation_values.offset
         s = animation_values.sprite_size
 
-        rl.draw_texture_rec(
+        """rl.draw_texture_rec(
                 self._texture,
                 rl.Rectangle(o[0] + self._frame * s[0], o[1], 
                              s[0], s[1]),
                 rl.Vector2(self._position[0], self._position[1]),
                 rl.RAYWHITE
-            )
+            )"""
+        rl.draw_texture_tiled(self._texture,
+                rl.Rectangle(o[0] + self._frame * s[0], o[1], 
+                             s[0], s[1]),
+                rl.Rectangle(self._position[0], self._position[1],
+                            s[0]*self._scale, s[1]*self._scale),
+                rl.Vector2(s[0], s[1]),
+                self._rotation,
+                self._scale,
+                rl.RAYWHITE
+        ) 
+
+    def rotate_ccw(self, frame_time):
+        self._rotation -= frame_time * 180 / 1.0 # 180 degrees per second clockwise
+        self._rotation %= 360
+        print("Rotation: ", self._rotation)
+
+    def rotate_cw(self, frame_time):
+        self._rotation += frame_time * 180 / 1.0 # 180 degrees per second counter-clockwise
+        self._rotation %= 360
+        print("Rotation: ", self._rotation)
