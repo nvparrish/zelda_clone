@@ -24,12 +24,26 @@ class AnimationInfo:
         self.offset = offset
 
 class Player:
-    """
-    The textures came from https://opengameart.org/content/zelda-like-tilesets-and-sprites
-
+    """ A class for representing a player
+    
+    This could potentially could have some implementation pulled out into a base class to
+    animate other creatures on the map
     """
     def __init__(self, texture = 'gfx/character.png'):
+        """ Initialize the player object
 
+        This method will populate a dictionary to encode the animation information from the image.
+        Currently, the structure is hard-coded.  It would need to be more general for different
+        animation types.
+
+        The default textures came from https://opengameart.org/content/zelda-like-tilesets-and-sprites
+
+        Keyword arguments:
+        texture -- The texture to use for animating the player
+
+        Returns:
+        A Player object
+        """
         self._texture =  rl.load_texture(texture)
 
         self._animation_values = {}
@@ -67,12 +81,49 @@ class Player:
         self._rotation = 0.0
 
     def set_direction(self, direction):
-        self._player_direction = direction
+        """ Changes the player's direction
+
+        Positional arguments:
+        direction -- A Direction enumeration to assign to player's direction
+
+        Returns:
+        None
+
+        Exceptions:
+        Raises ValueError if input is not an Direction
+        """
+        if isinstance(direction, Direction):
+            self._player_direction = direction
+        else:
+            raise ValueError()
     
     def set_action(self, action):
-        self._player_action = action
+        """ Changes the player's action
+
+        Positional arguments:
+        action -- An Action enumeration to assign to player's action
+
+        Returns:
+        None
+
+        Exceptions:
+        Raises ValueError if input is not an Action
+        """
+        if isinstance(action, Action):
+            self._player_action = action
+        else:
+            raise ValueError()
 
     def draw(self, frame_time):
+        """
+        This function draws the player's sprite on the screen
+
+        Positional arguments:
+        frame_time -- the amount of time since the last frame, used to determine animation frame changes
+
+        Returns:
+        None
+        """
         self._timer += frame_time
         animation_values = self._animation_values[(self._player_direction, self._player_action)]
         if (self._timer >= 0.2): 
@@ -105,6 +156,14 @@ class Player:
         ) 
 
     def move(self, frame_time):
+        """ Manages a player's movements.  Uses frame time to scale by the fame rate.
+            
+            This checks key presses to handle movement.  The key pressing could be pulled
+            into a separate class later. 
+            
+        Positional arguments:
+        frame_time -- The time since the last frame, used to scale motion
+        """
         velocity = [0, 0]
         if rl.is_key_down(rl.KEY_RIGHT):
             velocity[0] += 1
@@ -154,11 +213,27 @@ class Player:
                     self._player_direction = Direction.DOWN
 
     def rotate_ccw(self, frame_time):
+        """ A function to rotate the player's sprite counter-clockwise 
+        
+        Positional arguments:
+        frame_time -- the duration of the last frame, used to scale rotation rate
+
+        Returns:
+        None
+        """
         self._rotation -= frame_time * 180 / 1.0 # 180 degrees per second clockwise
         self._rotation %= 360
         print("Rotation: ", self._rotation)
 
     def rotate_cw(self, frame_time):
+        """ A function to rotate the player's sprite clockwise 
+        
+        Positional arguments:
+        frame_time -- the duration of the last frame, used to scale rotation rate
+
+        Returns:
+        None
+        """
         self._rotation += frame_time * 180 / 1.0 # 180 degrees per second counter-clockwise
         self._rotation %= 360
         print("Rotation: ", self._rotation)
