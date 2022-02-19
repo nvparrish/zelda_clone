@@ -49,13 +49,13 @@ class Player:
         self._animation_values[(Direction.UP, Action.WALK)] = AnimationInfo(4, (16,32), (0,64))
         self._animation_values[(Direction.UP, Action.LIFT)] = AnimationInfo(3, (16,32), (80,64))
         self._animation_values[(Direction.UP, Action.CARRY)] = AnimationInfo(4, (16,32), (144,64))
-        self._animation_values[(Direction.UP, Action.HOLD)] = AnimationInfo(4, (16,32), (144,64))
+        self._animation_values[(Direction.UP, Action.HOLD)] = AnimationInfo(1, (16,32), (144,64))
 
-        self._animation_values[(Direction.LEFT, Action.STAND)] = AnimationInfo(4, (16,32), (0,96))
+        self._animation_values[(Direction.LEFT, Action.STAND)] = AnimationInfo(1, (16,32), (0,96))
         self._animation_values[(Direction.LEFT, Action.WALK)] = AnimationInfo(4, (16,32), (0,96))
         self._animation_values[(Direction.LEFT, Action.LIFT)] = AnimationInfo(3, (16,32), (80,96))
         self._animation_values[(Direction.LEFT, Action.CARRY)] = AnimationInfo(4, (16,32), (144,96))
-        self._animation_values[(Direction.LEFT, Action.HOLD)] = AnimationInfo(4, (16,32), (144,96))
+        self._animation_values[(Direction.LEFT, Action.HOLD)] = AnimationInfo(1, (16,32), (144,96))
 
         self._timer = 0
         self._frame = 0
@@ -114,10 +114,24 @@ class Player:
             velocity[1] -= 1
         if rl.is_key_down(rl.KEY_DOWN):
             velocity[1] += 1
-        amplitude = velocity[0]*velocity[0] + velocity[1]*velocity[1]
-        if amplitude < 1e-5:
-            pass # Don't change position or scale speed
+        amplitude_sq = velocity[0]*velocity[0] + velocity[1]*velocity[1]
+        if amplitude_sq < 1e-4: # Small threshold because of quantization
+            # Don't change position, but change animation; no walking
+            if self._player_action == Action.WALK: 
+                self._player_action = Action.STAND
+            elif self._player_action == Action.CARRY:
+                self._player_action = Action.HOLD
         else:
+            # Change the action for movement
+            if self._player_action == Action.STAND:
+                self._player_action = Action.WALK
+            elif self._player_action == Action.HOLD:
+                self._player_action = Action.CARRY
+
+            # Set velocity and move
+            velocity = [ x * settings.PLAYER_SPEED * frame_time / math.sqrt(amplitude_sq) for x in velocity ]
+            self._position = [ x[0] + x[1] for x in zip(self._position, velocity) ]
+
             if abs(velocity[0]) == abs(velocity[1]):
                 # A player moving diagonally could face either direction
                 possible_directions = []
