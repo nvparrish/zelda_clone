@@ -1,5 +1,6 @@
 import pyray as rl
 import settings
+import math
 
 from enum import Enum
 
@@ -102,6 +103,41 @@ class Player:
                 self._scale,
                 rl.RAYWHITE
         ) 
+
+    def move(self, frame_time):
+        velocity = [0, 0]
+        if rl.is_key_down(rl.KEY_RIGHT):
+            velocity[0] += 1
+        if rl.is_key_down(rl.KEY_LEFT):
+            velocity[0] -= 1
+        if rl.is_key_down(rl.KEY_UP):
+            velocity[1] -= 1
+        if rl.is_key_down(rl.KEY_DOWN):
+            velocity[1] += 1
+        amplitude = velocity[0]*velocity[0] + velocity[1]*velocity[1]
+        if amplitude < 1e-5:
+            pass # Don't change position or scale speed
+        else:
+            if abs(velocity[0]) == abs(velocity[1]):
+                # A player moving diagonally could face either direction
+                possible_directions = []
+                possible_directions.append(Direction.LEFT if velocity[0] < 0 else Direction.RIGHT)
+                possible_directions.append(Direction.UP if velocity[1] < 0 else Direction.DOWN)
+                if not self._player_direction in possible_directions:
+                    # Favor the direction the player was already facing, but only if it is in the angle direction
+                    self._player_direction = possible_directions[0]
+            elif abs(velocity[0]) > abs(velocity[1]):
+                # Player is moving right or left
+                if velocity[0] < 0:
+                    self._player_direction = Direction.LEFT
+                else:
+                    self._player_direction = Direction.RIGHT
+            else:
+                # Player is moving up or down
+                if velocity[1] < 0:
+                    self._player_direction = Direction.UP
+                else:
+                    self._player_direction = Direction.DOWN
 
     def rotate_ccw(self, frame_time):
         self._rotation -= frame_time * 180 / 1.0 # 180 degrees per second clockwise

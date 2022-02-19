@@ -26,6 +26,7 @@ class Game:
             rl.draw_text("Congrats!  You created your first window!", 190, 200, 20, rl.LIGHTGRAY)
             debug.debug(self.debug_info)
             frame_time = rl.get_frame_time()
+            self._player.move(frame_time)
             self._player.rotate_cw(frame_time)
             self._player.draw(frame_time)
             rl.end_drawing()
