@@ -1,29 +1,46 @@
 import os
+import player
 
-#os.environ["RAYLIB_BIN_PATH"] = "ext/raylib-2.0.0-Linux-amd64/lib/"
+os.environ["RAYLIB_BIN_PATH"] = "ext/raylib-2.0.0-Linux-amd64/lib/"
 #os.environ["RAYLIB_BIN_PATH"] = "/usr/local/lib/" # Possible if 2.0.0 is system version 
 
-import raylibpy
+import pyray as rl
+import debug
+import settings
 
 class Game:
     def __init__(self):
-        pass
+        # Set up the window
+        rl.init_window(settings.WIDTH, settings.HEIGHT, "Zelda Clone")
+        rl.set_target_fps(60)
+        self._player = player.Player()
+
+        self.debug_info = ""
     
     def run(self):
-        # Set up the window
-        raylibpy.init_window(800, 450, "Zelda Clone")
-        raylibpy.set_target_fps(60)
-
         # Main loop
-        while not raylibpy.window_should_close():
-            raylibpy.begin_drawing()
-            raylibpy.clear_background(raylibpy.RAYWHITE)
-            raylibpy.draw_text("Congrats!  You created your first window!", 190, 200, 20, raylibpy.LIGHTGRAY)
-            raylibpy.end_drawing()
+        CHARACTER = rl.load_texture('gfx/character.png')
+        while not rl.window_should_close():
+            rl.begin_drawing()
+            rl.clear_background(rl.BLACK)
+            rl.draw_text("Congrats!  You created your first window!", 190, 200, 20, rl.LIGHTGRAY)
+            debug.debug(self.debug_info)
+            frame_time = rl.get_frame_time()
+            self._player.move(frame_time)
+            # self._player.rotate_cw(frame_time)
+            self._player.draw(frame_time)
+            rl.end_drawing()
 
         # clean up
-        raylibpy.close_window()
+        rl.close_window()
+
+    def set_debug(self, info):
+        self.debug_info  = info
+
+    def reset_debug(self):
+        self.debug_info  = ""
 
 if __name__ == '__main__':
     game = Game()
+    game.set_debug("hello :)")
     game.run()
