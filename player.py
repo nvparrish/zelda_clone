@@ -114,6 +114,14 @@ class Player:
         else:
             raise ValueError()
 
+    def get_position(self):
+        """ Returns the player position
+
+        Returns:
+        A Vector2 object representing the player position
+        """
+        return rl.Vector2(self._position[0], self._position[1])
+
     def draw(self, frame_time):
         """
         This function draws the player's sprite on the screen

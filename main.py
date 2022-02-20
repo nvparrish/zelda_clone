@@ -14,6 +14,7 @@ class Game:
         rl.init_window(settings.WIDTH, settings.HEIGHT, "Zelda Clone")
         rl.set_target_fps(60)
         self._player = player.Player()
+        self.camera = rl.Camera2D(rl.Vector2(settings.WIDTH//2, settings.HEIGHT//2), self._player.get_position(), 0, 1)
 
         self.debug_info = ""
     
@@ -22,13 +23,17 @@ class Game:
         CHARACTER = rl.load_texture('gfx/character.png')
         while not rl.window_should_close():
             rl.begin_drawing()
+            rl.begin_mode_2d(self.camera)
             rl.clear_background(rl.BLACK)
             rl.draw_text("Congrats!  You created your first window!", 190, 200, 20, rl.LIGHTGRAY)
             debug.debug(self.debug_info)
             frame_time = rl.get_frame_time()
             self._player.move(frame_time)
+            self.camera.target = self._player.get_position()
+            # rl.update_camera(self.camera)
             # self._player.rotate_cw(frame_time)
             self._player.draw(frame_time)
+            rl.end_mode_2d(self.camera)
             rl.end_drawing()
 
         # clean up
