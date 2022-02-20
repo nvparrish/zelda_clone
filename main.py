@@ -7,13 +7,16 @@ os.environ["RAYLIB_BIN_PATH"] = "ext/raylib-2.0.0-Linux-amd64/lib/"
 import pyray as rl
 import debug
 import settings
+import level
 
 class Game:
     def __init__(self):
         # Set up the window
         rl.init_window(settings.WIDTH, settings.HEIGHT, "Zelda Clone")
         rl.set_target_fps(60)
+        rl.init_audio_device()
         self._player = player.Player()
+        self._level = level.Level()
 
         self.debug_info = ""
     
@@ -29,6 +32,7 @@ class Game:
             self._player.move(frame_time)
             # self._player.rotate_cw(frame_time)
             self._player.draw(frame_time)
+            self._level.update_music_stream()
             rl.end_drawing()
 
         # clean up

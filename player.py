@@ -80,6 +80,9 @@ class Player:
         self._scale = 2.0
         self._rotation = 0.0
 
+        self._attack_sound = rl.load_sound('snd/WeaponBlow.ogg')
+        self._is_attacking = False
+
     def set_direction(self, direction):
         """ Changes the player's direction
 
@@ -173,6 +176,12 @@ class Player:
             velocity[1] -= 1
         if rl.is_key_down(rl.KEY_DOWN):
             velocity[1] += 1
+        if rl.is_key_pressed(rl.KEY_SPACE):
+            self._is_attacking = True
+            rl.play_sound(self._attack_sound)
+        if rl.is_key_released(rl.KEY_SPACE):
+            self._is_attacking = False
+
         amplitude_sq = velocity[0]*velocity[0] + velocity[1]*velocity[1]
         if amplitude_sq < 1e-4: # Small threshold because of quantization
             # Don't change position, but change animation; no walking
