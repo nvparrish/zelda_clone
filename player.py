@@ -1,6 +1,8 @@
 import pyray as rl
 import settings
 import math
+from animation_info import AnimationInfo
+from projectile import Projectile
 
 from enum import Enum
 
@@ -16,12 +18,6 @@ class Action(Enum):
     LIFT = 2
     CARRY = 3
     HOLD = 4
-
-class AnimationInfo:
-    def __init__(self, frame_count, sprite_size, offset):
-        self.frame_count = frame_count
-        self.sprite_size = sprite_size
-        self.offset = offset
 
 class Player:
     """ A class for representing a player
@@ -79,6 +75,7 @@ class Player:
         self._position = (settings.WIDTH//2, settings.HEIGHT//2) # Currently in reference to the screen, using the upper-left corner
         self._scale = 2.0
         self._rotation = 0.0
+        self._projectiles = []
 
     def set_direction(self, direction):
         """ Changes the player's direction
@@ -154,6 +151,8 @@ class Player:
                 self._scale,
                 rl.RAYWHITE
         ) 
+        for projectile in self._projectiles:
+            projectile.draw(frame_time)
 
     def move(self, frame_time):
         """ Manages a player's movements.  Uses frame time to scale by the fame rate.
@@ -173,6 +172,8 @@ class Player:
             velocity[1] -= 1
         if rl.is_key_down(rl.KEY_DOWN):
             velocity[1] += 1
+        if rl.is_mouse_button_pressed(rl.MOUSE_BUTTON_LEFT):
+            self._projectiles.append(Projectile(self._position, (rl.get_mouse_x(), rl.get_mouse_y())))
         amplitude_sq = velocity[0]*velocity[0] + velocity[1]*velocity[1]
         if amplitude_sq < 1e-4: # Small threshold because of quantization
             # Don't change position, but change animation; no walking
@@ -189,7 +190,7 @@ class Player:
 
             # Set velocity and move
             velocity = [ x * settings.PLAYER_SPEED * frame_time / math.sqrt(amplitude_sq) for x in velocity ]
-            self._position = [ x[0] + x[1] for x in zip(self._position, velocity) ]
+            self._position = tuple([ x[0] + x[1] for x in zip(self._position, velocity) ])
 
             if abs(velocity[0]) == abs(velocity[1]):
                 # A player moving diagonally could face either direction
@@ -211,6 +212,10 @@ class Player:
                     self._player_direction = Direction.UP
                 else:
                     self._player_direction = Direction.DOWN
+        for projectile in self._projectiles:
+            projectile.move(frame_time)
+            if projectile.is_dead():
+                self._projectiles.remove(projectile)
 
     def rotate_ccw(self, frame_time):
         """ A function to rotate the player's sprite counter-clockwise 
